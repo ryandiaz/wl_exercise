@@ -1,0 +1,36 @@
+{
+  "name": "imagegen-backend",
+  "version": "1.0.0",
+  "description": "Node.js TypeScript Express server for image generation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "watch": "tsc -w",
+    "migrate": "ts-node run-migration.ts"
+  },
+  "keywords": [
+    "typescript",
+    "express",
+    "node"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fal-ai/client": "^1.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "openai": "^5.8.2",
+    "pg": "^8.11.3",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.17",
+    "@types/pg": "^8.10.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

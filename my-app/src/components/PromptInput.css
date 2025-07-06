@@ -1,0 +1,68 @@
+.prompt-input-container {
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.app-title {
+  margin: 0 0 20px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+.input-controls {
+  display: flex;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.prompt-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.prompt-input:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.prompt-input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.arrange-button {
+  padding: 12px 24px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.arrange-button:hover:not(:disabled) {
+  background: #5b4cdb;
+}
+
+.arrange-button:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
+.generation-status {
+  margin-top: 12px;
+  color: #6c5ce7;
+  font-style: italic;
+} 
