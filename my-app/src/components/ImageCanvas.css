@@ -1,11 +1,11 @@
 .image-canvas {
   position: relative;
   flex: 1;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   overflow: hidden;
   min-height: 400px;
   background-image: 
-    radial-gradient(circle at 1px 1px, rgba(108, 92, 231, 0.1) 1px, transparent 0);
+    radial-gradient(circle at 1px 1px, var(--grid-pattern) 1px, transparent 0);
   background-size: 20px 20px;
 }
 
@@ -15,15 +15,15 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  color: #6c757d;
+  color: var(--text-tertiary);
 }
 
 .placeholder-content {
   padding: 40px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--overlay-bg);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(108, 92, 231, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 .placeholder-icon {
@@ -34,11 +34,60 @@
 .placeholder-content h3 {
   margin: 0 0 12px 0;
   font-size: 1.5rem;
-  color: #495057;
+  color: var(--text-secondary);
 }
 
 .placeholder-content p {
   margin: 0;
   font-size: 1rem;
   opacity: 0.8;
+  color: var(--text-tertiary);
+}
+
+.context-menu {
+  position: absolute;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px 0;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: contextMenuFadeIn 0.1s ease-out;
+}
+
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  margin: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.context-menu-item:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+
+.context-menu-item:disabled {
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 } 

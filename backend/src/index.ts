@@ -1,20 +1,23 @@
 import express, { Request, Response } from 'express';
+import dotenv from 'dotenv';
 import { fal } from "@fal-ai/client";
 import OpenAI from "openai";
 import { ImageData } from './types';
 
 import cors from 'cors';
-import FavoritesService from './favoritesService';
+import { PostgreSQLFavoritesService } from './favoritesService';
+
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// RYANDEBUG: singleton for now, but should be a database
-const favoritesService = new FavoritesService();
+const favoritesService = new PostgreSQLFavoritesService();
 
 async function generatePromptVariations(prompt: string): Promise<string[]> {
+  console.log('generating prompt variations for: ', prompt);
   // use openai to generate 4 variations of the prompt
   const res = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -44,20 +47,12 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req: Request, res: Response) => {
   res.json({ 
     message: 'ImageGen Backend Server is running',
-    endpoints: ['/image', '/favorites']
+    endpoints: ['/api/image', '/api/favorites']
   });
 });
 
 // Image endpoint
-app.get('/image', (req: Request, res: Response) => {
-  res.json({
-    message: 'Image endpoint',
-    method: 'GET',
-    timestamp: new Date().toISOString()
-  });
-});
-
-app.post('/image', async (req: Request, res: Response) => {
+app.post('/api/image', async (req: Request, res: Response) => {
   const { prompt } = req.body;
   console.log('incoming prompt: ', prompt, ' body: ', req.body);
 
@@ -94,7 +89,7 @@ app.post('/image', async (req: Request, res: Response) => {
 });
 
 // Favorites endpoint
-app.get('/favorites', async (_req: Request, res: Response) => {
+app.get('/api/favorites', async (_req: Request, res: Response) => {
   // TODO: make this user specific
   // TODO: add pagination
   const favorites = await favoritesService.getFavorites();
@@ -103,15 +98,24 @@ app.get('/favorites', async (_req: Request, res: Response) => {
   });
 });
 
-app.post('/favorites', async (req: Request, res: Response) => {
-  const { imageData } = req.body;
-  await favoritesService.addFavorite(JSON.parse(imageData));
-  res.json({
-    message: 'Added to favorites',
-  });
+app.post('/api/favorites', async (req: Request, res: Response) => {
+  console.log('Adding to favorites:', req.body);
+  try {
+    const imageData  = req.body as ImageData;
+    await favoritesService.addFavorite(imageData);
+    res.json({
+      message: 'Added to favorites',
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Error adding to favorites',
+      error: error
+    });
+  }
 });
 
-app.delete('/favorites/:id', async (req: Request, res: Response) => {
+app.delete('/api/favorites/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   await favoritesService.removeFavorite(id);
   res.json({
@@ -125,7 +129,7 @@ app.delete('/favorites/:id', async (req: Request, res: Response) => {
 app.use('*', (req: Request, res: Response) => {
   res.status(404).json({
     error: 'Route not found',
-    availableRoutes: ['/', '/image', '/favorites']
+    availableRoutes: ['/', '/api/image', '/api/favorites']
   });
 });
 
@@ -144,13 +148,13 @@ module.exports = app;
 // Only start the server if running locally (not in Lambda)
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server is running on port ${PORT}`);
     console.log(`📝 Available endpoints:`);
     console.log(`   GET  /           - Health check`);
-    console.log(`   GET  /image      - Get image info`);
-    console.log(`   POST /image      - Generate image`);
-    console.log(`   GET  /favorites  - Get favorites list`);
-    console.log(`   POST /favorites  - Add to favorites`);
-    console.log(`   DELETE /favorites/:id - Remove from favorites`);
+    console.log(`   GET  /api/image      - Get image info`);
+    console.log(`   POST /api/image      - Generate image`);
+    console.log(`   GET  /api/favorites  - Get favorites list`);
+    console.log(`   POST /api/favorites  - Add to favorites`);
+    console.log(`   DELETE /api/favorites/:id - Remove from favorites`);
   });
 } 

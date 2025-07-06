@@ -21,12 +21,10 @@ npm start
 - **GET** `/` - Server health check
 
 ### Image Endpoints
-- **GET** `/image` - Get image information
-- **POST** `/image` - Generate/process image
+- **POST** `/api/image` - Generate/process image
   ```json
   {
     "prompt": "your image prompt",
-    "style": "artistic",
     "size": "512x512"
   }
   ```
@@ -43,7 +41,7 @@ npm start
 - **DELETE** `/favorites/:id` - Remove from favorites
 
 ## Server Details
-- **Port**: 3000 (or PORT environment variable)
+- **Port**: 8080 (or PORT environment variable)
 - **CORS**: Enabled for all origins
 - **Body Parsing**: JSON and URL-encoded supported
 

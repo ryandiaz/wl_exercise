@@ -5,6 +5,7 @@ export interface ImageData {
   position: Position;
   isGenerating?: boolean;
   variations?: string[];
+  isFavorite?: boolean;
 }
 
 export interface Position {

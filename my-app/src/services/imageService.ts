@@ -1,8 +1,8 @@
 import { GenerationRequest, GenerationResponse } from '../types';
 
 
-const imageGenerationUrl = 'http://localhost:8080/image';
-const favoritesUrl = 'http://localhost:8080/favorites';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const imageGenerationUrl = `${API_BASE_URL}/api/image`;
 
 // Placeholder service for image generation
 export class ImageGenerationService {
@@ -38,45 +38,4 @@ export class ImageGenerationService {
     return response.json();
   }
 
-  static async getFavorites(userId: string): Promise<ImageData[]> {
-    const response = await fetch(favoritesUrl, {
-      method: 'GET',
-      body: JSON.stringify({ userId })
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data.images instanceof Array) {
-        const imageList = data.images.map((image: any) => ({
-          id: image.id,
-          url: image.url,
-          prompt: image.prompt,
-          variations: image.variations
-        }));
-        return imageList;
-      }
-      return [];
-    }
-    return [];
-  }
-
-  static async addToFavorites(userId: string, imageData: ImageData): Promise<void> {
-    const response = await fetch(favoritesUrl, {
-      method: 'POST',
-      body: JSON.stringify({ userId, imageData })
-    });
-    if (response.ok) {
-      return;
-    }
-    throw new Error('Failed to add to favorites');
-  }
-
-  static async removeFromFavorites(userId: string, imageId: string): Promise<void> {
-    const response = await fetch(favoritesUrl + '/' + imageId, {
-      method: 'DELETE',
-    });
-    if (response.ok) {
-      return;
-    }
-    throw new Error('Failed to remove from favorites');
-  }
 } 

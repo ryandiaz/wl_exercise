@@ -15,113 +15,134 @@ variable "environment" {
   }
 }
 
-variable "openai_api_key" {
-  description = "OpenAI API Key for GPT integration"
+variable "api_url" {
+  description = "API URL for the frontend to connect to"
   type        = string
-  sensitive   = true
+  default     = ""
 }
 
-variable "fal_key" {
-  description = "FAL AI API Key for image generation"
+# S3 and CloudFront Variables for Frontend
+variable "s3_bucket_name" {
+  description = "Name of the S3 bucket for hosting the React app"
   type        = string
-  sensitive   = true
+  default     = "imagegen-frontend"
 }
 
-variable "lambda_timeout" {
-  description = "Lambda function timeout in seconds"
-  type        = number
-  default     = 30
+variable "cloudfront_price_class" {
+  description = "CloudFront distribution price class"
+  type        = string
+  default     = "PriceClass_100"
+  
+  validation {
+    condition     = can(regex("^(PriceClass_100|PriceClass_200|PriceClass_All)$", var.cloudfront_price_class))
+    error_message = "Price class must be one of: PriceClass_100, PriceClass_200, PriceClass_All."
+  }
 }
 
-variable "lambda_memory_size" {
-  description = "Lambda function memory size in MB"
+variable "cloudfront_default_root_object" {
+  description = "Default root object for CloudFront distribution"
+  type        = string
+  default     = "index.html"
+}
+
+variable "frontend_build_command" {
+  description = "Command to build the React app"
+  type        = string
+  default     = "npm run build"
+}
+
+variable "frontend_source_dir" {
+  description = "Source directory for the React app"
+  type        = string
+  default     = "../my-app"
+}
+
+variable "backend_source_dir" {
+  description = "Source directory for the backend Express app"
+  type        = string
+  default     = "."
+}
+
+# ECS Variables
+variable "ecs_cpu" {
+  description = "CPU units for ECS task (1024 = 1 vCPU)"
   type        = number
   default     = 512
+  
+  validation {
+    condition     = contains([256, 512, 1024, 2048, 4096], var.ecs_cpu)
+    error_message = "ECS CPU must be one of: 256, 512, 1024, 2048, 4096."
+  }
 }
 
-variable "log_retention_days" {
-  description = "CloudWatch logs retention period in days"
+variable "ecs_memory" {
+  description = "Memory (MB) for ECS task"
   type        = number
-  default     = 14
+  default     = 1024
+  
+  validation {
+    condition     = var.ecs_memory >= 512 && var.ecs_memory <= 30720
+    error_message = "ECS memory must be between 512 and 30720 MB."
+  }
 }
 
-# RDS Variables
-variable "db_instance_class" {
-  description = "RDS instance class"
+variable "openai_api_key_secret_arn" {
+  description = "ARN of the AWS Secrets Manager secret containing the OpenAI API key"
   type        = string
-  default     = "db.t3.micro"
+  default     = ""
 }
 
+variable "fal_key_secret_arn" {
+  description = "ARN of the AWS Secrets Manager secret containing the FAL API key"
+  type        = string
+  default     = ""
+}
+
+# Database Variables
 variable "db_name" {
-  description = "Database name"
+  description = "Name of the PostgreSQL database"
   type        = string
-  default     = "imagegen"
+  default     = "imagegen_db"
 }
 
 variable "db_username" {
-  description = "Database master username"
+  description = "Username for the PostgreSQL database"
   type        = string
-  default     = "imagegen_user"
+  default     = "postgres"
 }
 
-variable "db_password" {
-  description = "Database master password"
+variable "db_instance_class" {
+  description = "Instance class for the RDS Aurora instances"
   type        = string
-  sensitive   = true
-}
-
-variable "db_allocated_storage" {
-  description = "Allocated storage for RDS instance in GB"
-  type        = number
-  default     = 20
+  default     = "db.r5.large"
 }
 
 variable "db_backup_retention_period" {
-  description = "Backup retention period in days"
+  description = "Number of days to retain backups"
   type        = number
   default     = 7
 }
 
-# EC2 Variables for Migration Instance
-variable "ec2_instance_type" {
-  description = "EC2 instance type for migration instance"
+variable "db_backup_window" {
+  description = "Preferred backup window"
   type        = string
-  default     = "t3.micro"
+  default     = "03:00-04:00"
 }
 
-variable "ec2_key_name" {
-  description = "EC2 Key Pair name for SSH access"
+variable "db_maintenance_window" {
+  description = "Preferred maintenance window"
   type        = string
-  default     = null
+  default     = "sun:04:00-sun:05:00"
 }
 
-variable "ec2_associate_public_ip" {
-  description = "Whether to associate a public IP with the EC2 instance"
-  type        = bool
-  default     = true
-}
-
-# DynamoDB Variables
-variable "dynamodb_table_name" {
-  description = "Name of the DynamoDB table for storing favorites"
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
   type        = string
-  default     = "imagegen-favorites"
+  default     = "10.0.0.0/16"
 }
 
-variable "dynamodb_billing_mode" {
-  description = "DynamoDB billing mode (PAY_PER_REQUEST or PROVISIONED)"
-  type        = string
-  default     = "PAY_PER_REQUEST"
-}
-
-variable "dynamodb_read_capacity" {
-  description = "DynamoDB read capacity units (only used if billing_mode is PROVISIONED)"
-  type        = number
-  default     = 5
-}
-
-variable "dynamodb_write_capacity" {
-  description = "DynamoDB write capacity units (only used if billing_mode is PROVISIONED)"
-  type        = number
-  default     = 5
+variable "allowed_cidr_blocks" {
+  description = "List of CIDR blocks allowed to access the database"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]  # Allow from anywhere - modify for better security
 } 

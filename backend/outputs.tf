@@ -1,108 +1,124 @@
-output "api_gateway_url" {
-  description = "URL of the API Gateway endpoint"
-  value       = aws_api_gateway_deployment.imagegen_deployment.invoke_url
+# Frontend S3 and CloudFront Outputs
+output "frontend_bucket_name" {
+  description = "Name of the S3 bucket hosting the frontend"
+  value       = aws_s3_bucket.frontend_bucket.id
 }
 
-output "api_gateway_stage_url" {
-  description = "Full URL of the API Gateway with stage"
-  value       = "${aws_api_gateway_deployment.imagegen_deployment.invoke_url}/${var.environment}"
+output "frontend_bucket_arn" {
+  description = "ARN of the S3 bucket hosting the frontend"
+  value       = aws_s3_bucket.frontend_bucket.arn
 }
 
-output "lambda_function_name" {
-  description = "Name of the deployed Lambda function"
-  value       = aws_lambda_function.imagegen_lambda.function_name
+output "frontend_bucket_website_endpoint" {
+  description = "Website endpoint of the S3 bucket"
+  value       = aws_s3_bucket.frontend_bucket.website_endpoint
 }
 
-output "lambda_function_arn" {
-  description = "ARN of the deployed Lambda function"
-  value       = aws_lambda_function.imagegen_lambda.arn
+output "cloudfront_distribution_id" {
+  description = "ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.frontend_distribution.id
 }
 
-output "lambda_function_url" {
-  description = "Invoke URL for the Lambda function"
-  value       = aws_lambda_function.imagegen_lambda.invoke_arn
+output "cloudfront_domain_name" {
+  description = "Domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.frontend_distribution.domain_name
 }
 
-output "cloudwatch_log_group" {
-  description = "CloudWatch log group name for Lambda function"
-  value       = aws_cloudwatch_log_group.lambda_logs.name
+output "cloudfront_distribution_arn" {
+  description = "ARN of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.frontend_distribution.arn
 }
 
-# RDS Outputs
-output "db_instance_endpoint" {
-  description = "RDS instance endpoint"
-  value       = aws_db_instance.imagegen_db.endpoint
+output "frontend_url" {
+  description = "URL of the deployed frontend application"
+  value       = "https://${aws_cloudfront_distribution.frontend_distribution.domain_name}"
 }
 
-output "db_instance_port" {
-  description = "RDS instance port"
-  value       = aws_db_instance.imagegen_db.port
+# ECS and Backend Outputs
+output "ecs_cluster_name" {
+  description = "Name of the ECS cluster"
+  value       = aws_ecs_cluster.backend_cluster.name
 }
 
-output "db_instance_identifier" {
-  description = "RDS instance identifier"
-  value       = aws_db_instance.imagegen_db.identifier
+output "ecs_cluster_arn" {
+  description = "ARN of the ECS cluster"
+  value       = aws_ecs_cluster.backend_cluster.arn
 }
 
-output "db_name" {
-  description = "Database name"
-  value       = aws_db_instance.imagegen_db.db_name
+output "ecs_service_name" {
+  description = "Name of the ECS service"
+  value       = aws_ecs_service.backend_service.name
 }
 
-output "db_username" {
-  description = "Database master username"
-  value       = aws_db_instance.imagegen_db.username
+output "backend_alb_dns_name" {
+  description = "DNS name of the Application Load Balancer"
+  value       = aws_lb.backend_alb.dns_name
+}
+
+output "backend_alb_zone_id" {
+  description = "Zone ID of the Application Load Balancer"
+  value       = aws_lb.backend_alb.zone_id
+}
+
+output "backend_url" {
+  description = "URL of the deployed backend API"
+  value       = "http://${aws_lb.backend_alb.dns_name}"
+}
+
+output "ecr_repository_url" {
+  description = "URL of the ECR repository"
+  value       = aws_ecr_repository.backend_ecr.repository_url
+}
+
+output "ecr_repository_name" {
+  description = "Name of the ECR repository"
+  value       = aws_ecr_repository.backend_ecr.name
+}
+
+# Database Outputs
+output "database_endpoint" {
+  description = "Aurora PostgreSQL cluster endpoint"
+  value       = aws_rds_cluster.postgresql_cluster.endpoint
+}
+
+output "database_reader_endpoint" {
+  description = "Aurora PostgreSQL cluster reader endpoint"
+  value       = aws_rds_cluster.postgresql_cluster.reader_endpoint
+}
+
+output "database_port" {
+  description = "Aurora PostgreSQL cluster port"
+  value       = aws_rds_cluster.postgresql_cluster.port
+}
+
+output "database_name" {
+  description = "PostgreSQL database name"
+  value       = aws_rds_cluster.postgresql_cluster.database_name
+}
+
+output "database_username" {
+  description = "PostgreSQL database username"
+  value       = aws_rds_cluster.postgresql_cluster.master_username
+}
+
+output "database_password" {
+  description = "PostgreSQL database password"
+  value       = random_password.database_password.result
   sensitive   = true
 }
 
-# EC2 Migration Instance Outputs
-output "migration_instance_id" {
-  description = "ID of the migration EC2 instance"
-  value       = aws_instance.migration_instance.id
+output "database_connection_string" {
+  description = "PostgreSQL connection string"
+  value       = "postgresql://${aws_rds_cluster.postgresql_cluster.master_username}:${random_password.database_password.result}@${aws_rds_cluster.postgresql_cluster.endpoint}:${aws_rds_cluster.postgresql_cluster.port}/${aws_rds_cluster.postgresql_cluster.database_name}"
+  sensitive   = true
 }
 
-output "migration_instance_public_ip" {
-  description = "Public IP address of the migration EC2 instance"
-  value       = aws_instance.migration_instance.public_ip
+output "vpc_id" {
+  description = "ID of the VPC created for the database"
+  value       = aws_vpc.database_vpc.id
 }
 
-output "migration_instance_private_ip" {
-  description = "Private IP address of the migration EC2 instance"
-  value       = aws_instance.migration_instance.private_ip
-}
-
-output "migration_instance_public_dns" {
-  description = "Public DNS name of the migration EC2 instance"
-  value       = aws_instance.migration_instance.public_dns
-}
-
-output "migration_instance_ssh_command" {
-  description = "SSH command to connect to the migration instance (if key pair is configured)"
-  value       = var.ec2_key_name != null ? "ssh -i ~/.ssh/${var.ec2_key_name}.pem ec2-user@${aws_instance.migration_instance.public_ip}" : "Key pair not configured - use AWS Session Manager"
-}
-
-output "migration_instance_psql_command" {
-  description = "Command to connect to the database from the migration instance"
-  value       = "psql -h ${aws_db_instance.imagegen_db.endpoint} -p ${aws_db_instance.imagegen_db.port} -U ${aws_db_instance.imagegen_db.username} -d ${aws_db_instance.imagegen_db.db_name}"
-}
-
-# DynamoDB Outputs
-output "dynamodb_table_name" {
-  description = "Name of the DynamoDB table for favorites"
-  value       = aws_dynamodb_table.favorites_table.name
-}
-
-output "dynamodb_table_arn" {
-  description = "ARN of the DynamoDB table for favorites"
-  value       = aws_dynamodb_table.favorites_table.arn
-}
-
-output "dynamodb_table_id" {
-  description = "ID of the DynamoDB table for favorites"
-  value       = aws_dynamodb_table.favorites_table.id
-}
-
-output "dynamodb_table_stream_arn" {
-  description = "ARN of the DynamoDB table stream (if enabled)"
-  value       = aws_dynamodb_table.favorites_table.stream_arn
+output "database_security_group_id" {
+  description = "ID of the security group for the database"
+  value       = aws_security_group.database_sg.id
 } 
