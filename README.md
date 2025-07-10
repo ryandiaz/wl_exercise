@@ -1,6 +1,7 @@
 # ImageGen - AI-Powered Image Generation Platform
 
-See a running demo here : https://d104an3nk84c9.cloudfront.net/
+~~See a running demo here : https://d104an3nk84c9.cloudfront.net/~~
+Site has been taken down as of July 10
 
 ## 🏗️ Architecture Overview
 
